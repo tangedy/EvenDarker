@@ -10,6 +10,7 @@ public class Player : MonoBehaviour
     public float mouseSensitivity = 2f;
     private float verticalRotation = 0f;
     private Transform cameraTransform;
+    private Transform cameraPivot;
 
     // Ground Movement
     private Rigidbody rb;
@@ -33,6 +34,8 @@ public class Player : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         cameraTransform = Camera.main.transform;
+
+        cameraPivot = cameraTransform.parent;
 
         // Set the raycast to be slightly beneath the player's feet
         playerHeight = GetComponent<CapsuleCollider>().height * transform.localScale.y;
@@ -96,12 +99,19 @@ public class Player : MonoBehaviour
     void RotateCamera()
     {
         float horizontalRotation = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float verticalDelta = -Input.GetAxis("Mouse Y") * mouseSensitivity;
+
+        float bottomRotateMax = -70f;
+        float topRotateMax = 50f;
+
+        // Horizontal rotation: rotate the player body
         transform.Rotate(0, horizontalRotation, 0);
 
-        verticalRotation -= Input.GetAxis("Mouse Y") * mouseSensitivity;
-        verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f);
+        // Vertical rotation: rotate the pivot
+        verticalRotation += verticalDelta;
+        verticalRotation = Mathf.Clamp(verticalRotation, bottomRotateMax, topRotateMax);
 
-        cameraTransform.localRotation = Quaternion.Euler(verticalRotation, 0, 0);
+        cameraPivot.localRotation = Quaternion.Euler(verticalRotation, 0, 0);
     }
 
     void Jump()
